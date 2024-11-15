@@ -1,0 +1,155 @@
+---
+title: "Tidyverse Functions with Clinical Data"
+output: html_document
+date: "2024-11-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Loading Library
+
+library(tidyverse)
+```
+
+```{r}
+
+# Generate sample clinical trial data
+set.seed(123) # For reproducibility
+data <- tibble(
+  patient_id = 1:30,
+  treatment_group = rep(c("Drug A", "Drug B", "Drug C"), each = 10),
+  age = sample(25:75, 30, replace = TRUE),
+  baseline_weight = round(runif(30, 60, 100), 1), # Baseline weight in kg
+  systolic_bp = round(runif(30, 110, 160), 0),    # Systolic blood pressure
+  diastolic_bp = round(runif(30, 70, 100), 0)     # Diastolic blood pressure
+)
+data
+```
+
+```{r}
+# # Data Manipulation with dplyr
+
+# filter(): Subset data based on conditions.
+# filter patients from the "Drug A" treatment group who are over 50 years old.
+
+drug_a_over_50 <- data %>%
+  filter(treatment_group == "Drug A" & age > 50)
+drug_a_over_50
+```
+
+```{r}
+# mutate(): Add or modify columns.
+# We'll create a new column BMI using the baseline weight and a random height.
+
+data <- data %>%
+  mutate(
+    height_cm = round(runif(30, 150, 200), 1),  # Random height in cm
+    bmi = baseline_weight / ((height_cm / 100)^2)  # Calculate BMI
+  )
+colnames(data)
+
+```
+
+```{r}
+# group_by() and summarize(): Summarize data within groups.
+# Summarize average BMI and age by treatment group.
+
+
+summary_stats <- data %>%
+  group_by(treatment_group) %>%
+  summarize(
+    mean_bmi = mean(bmi, na.rm = TRUE),
+    mean_age = mean(age, na.rm = TRUE),
+    count = n()
+  )
+```
+
+```{r}
+# arrange(): Sort rows.
+# Sort the data by BMI in descending order.
+
+sorted_data <- data %>%
+  arrange(desc(bmi))
+sorted_data
+```
+
+```{r}
+
+# Reshaping Data with tidyr
+# The tidyr package helps reshape data, for example by pivoting.
+
+# pivot_longer(): Convert wide format to long format.
+# Convert systolic and diastolic BP columns into a long format.
+
+long_data <- data %>%
+  pivot_longer(cols = c(systolic_bp, diastolic_bp),
+               names_to = "bp_type",
+               values_to = "bp_value")
+long_data
+```
+```{r}
+#pivot_wider(): Convert long format to wide format.
+# Let's pivot the long data back to wide format.
+
+wide_data <- long_data %>%
+  pivot_wider(names_from = bp_type, values_from = bp_value)
+wide_data
+```
+```{r}
+# Visualization with ggplot2
+# ggplot2 allows you to visualize the data.
+
+# Basic scatter plot
+# Plot age against BMI for each treatment group.
+
+
+ggplot(data, aes(x = age, y = bmi, color = treatment_group)) +
+  geom_point() +
+  labs(title = "Age vs. BMI by Treatment Group", x = "Age (years)", y = "BMI") +
+  theme_minimal()
+```
+
+```{r}
+# Boxplot of BMI by Treatment Group
+# Create a boxplot to visualize the distribution of BMI across treatment groups.
+
+ggplot(data, aes(x = treatment_group, y = bmi, fill = treatment_group)) +
+  geom_boxplot() +
+  labs(title = "BMI Distribution by Treatment Group", x = "Treatment Group", y = "BMI") +
+  theme_minimal()
+```
+
+```{r}
+# Functional Programming with purrr
+# The purrr package provides functions for working with lists and performing repetitive tasks.
+
+# Using map() to apply a function across columns.
+# Let's standardize (normalize) age, baseline_weight, and bmi.
+
+standardized_data <- data %>%
+  mutate_at(vars(age, baseline_weight, bmi), list(~ (.-mean(.)) / sd(.)))
+standardized_data
+
+```
+
+```{r}
+# Save and Read Data with readr
+# Use readr to save and load data in CSV format.
+
+# Write data to CSV
+# Save the manipulated dataset to a CSV file.
+
+
+write_csv(data, "clinical_trial_data.csv")
+```
+
+```{r}
+# Read data from CSV
+# Load the dataset back into R.
+
+data_from_csv <- read_csv("clinical_trial_data.csv")
+data_from_csv
+```
