@@ -4,7 +4,7 @@ https://87ba3b58ad3340dda13b6e3a231b86d4.app.posit.cloud/file_show?path=%2Fcloud
 
 Tidyverse for Clinical Data Analysis involves using a collection of R packages designed for data manipulation, cleaning, visualization, and reporting, which are essential in clinical trial workflows.     
 
-Generate Sample Data: Created a dataset with 30 observations, including patient IDs, treatment group, age, weight, and blood pressure.         
+Generate Sample Data: Created a dataset with 30 observations, including patient IDs, treatment group, age, weight, and blood pressure.                                           
     
 Data Manipulation: Use dplyr functions:
 
